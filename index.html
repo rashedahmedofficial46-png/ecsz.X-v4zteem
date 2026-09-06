@@ -1,1 +1,282 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>সাইবার সিকিউরিটি হেল্প সেন্টার</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            background: #0b0e1a;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: #141824;
+            padding: 35px 30px;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            max-width: 520px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #2a2f42;
+        }
+
+        /* Canvas - যেখানে ছবি ও নাম একসাথে থাকবে */
+        .canvas-wrapper {
+            background: #0f1322;
+            padding: 12px;
+            border-radius: 18px;
+            border: 1px solid #2f3652;
+            display: none;
+            margin-top: 10px;
+        }
+
+        .canvas-wrapper.show {
+            display: block;
+        }
+
+        #nameCanvas {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            display: block;
+        }
+
+        /* ইনপুট ফিল্ড */
+        .input-area {
+            margin-top: 18px;
+        }
+
+        .input-area label {
+            color: #a8b2d1;
+            font-size: 16px;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .input-area input {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 40px;
+            border: none;
+            background: #1e2339;
+            color: #ffffff;
+            font-size: 18px;
+            text-align: center;
+            outline: 2px solid #2f3652;
+            transition: 0.2s;
+        }
+
+        .input-area input:focus {
+            outline: 2px solid #4c8bf5;
+        }
+
+        .input-area input::placeholder {
+            color: #5a6382;
+            font-size: 15px;
+        }
+
+        /* ডাউনলোড বাটন */
+        .download-btn {
+            margin-top: 16px;
+            background: #00ff88;
+            color: #0b0e1a;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            display: none;
+            width: 100%;
+        }
+
+        .download-btn:hover {
+            background: #00cc6a;
+            transform: scale(1.02);
+        }
+
+        .download-btn.show {
+            display: inline-block;
+        }
+
+        .footer {
+            margin-top: 18px;
+            font-size: 12px;
+            color: #3f486b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+
+    <!-- ইনপুট ফিল্ড -->
+    <div class="input-area">
+        <label for="nameInput">👇 এখানে আপনার নাম লিখুন</label>
+        <input type="text" id="nameInput" placeholder="যেমন: Rashd" />
+    </div>
+
+    <!-- Canvas যেখানে ছবি + নাম দেখাবে -->
+    <div class="canvas-wrapper" id="canvasWrapper">
+        <canvas id="nameCanvas" width="800" height="500"></canvas>
+        <button class="download-btn" id="downloadBtn">⬇️ HD ছবি ডাউনলোড করুন</button>
+    </div>
+
+    <div class="footer">✅ নাম দিলেই ছবির ওপর HD কোয়ালিটিতে দেখাবে</div>
+</div>
+
+<script>
+    const input = document.getElementById('nameInput');
+    const canvas = document.getElementById('nameCanvas');
+    const ctx = canvas.getContext('2d');
+    const wrapper = document.getElementById('canvasWrapper');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    // ছবি লোড করার ফাংশন
+    function loadImageAndGenerate(name) {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous'; // CORS সমস্যা এড়াতে
+        
+        // এখানে আপনার ছবির পাথ দিন
+        img.src = 'IMG-20260906-WA0050.jpg'; 
+
+        img.onload = function() {
+            generateImageWithName(img, name);
+        };
+
+        img.onerror = function() {
+            // ছবি না পেলে ডিফল্ট ডিজাইন দেখাবে
+            generateFallbackImage(name);
+        };
+    }
+
+    // মূল ফাংশন: ছবির ওপর নাম বসাবে
+    function generateImageWithName(img, name) {
+        const canvasWidth = 800;
+        const canvasHeight = 500;
+
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+
+        // 1. ব্যাকগ্রাউন্ড ছবি আঁকা
+        ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+
+        // 2. সাদা রেখা (ছবির ওপর)
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(80, 280);
+        ctx.lineTo(canvasWidth - 80, 280);
+        ctx.stroke();
+        ctx.globalAlpha = 1.0;
+
+        // 3. নাম লেখা (সবুজ, বড়, গ্লো সহ)
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = '#00ff88';
+        ctx.shadowBlur = 35;
+        ctx.font = 'bold 72px "Segoe UI", Tahoma, sans-serif';
+        ctx.fillStyle = '#00ff88';
+        ctx.fillText(name, canvasWidth/2, 380);
+
+        // 4. ছোট ফুটার (ঐচ্ছিক)
+        ctx.shadowBlur = 0;
+        ctx.font = '16px "Segoe UI", Tahoma, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.fillText('⚡ সাইবার সিকিউরিটি হেল্প সেন্টার', canvasWidth/2, 470);
+
+        wrapper.classList.add('show');
+        downloadBtn.classList.add('show');
+    }
+
+    // ব্যাকআপ: ছবি না পেলে ডিফল্ট ডিজাইন
+    function generateFallbackImage(name) {
+        const canvasWidth = 800;
+        const canvasHeight = 500;
+
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+
+        // ডার্ক ব্যাকগ্রাউন্ড
+        const gradient = ctx.createLinearGradient(0, 0, canvasWidth, canvasHeight);
+        gradient.addColorStop(0, '#0b0e1a');
+        gradient.addColorStop(1, '#141824');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+        // টেক্সট লোগো
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = 'bold 26px "Segoe UI", Tahoma, sans-serif';
+        ctx.fillStyle = '#a8b2d1';
+        ctx.fillText('🛡️ EXPERIENCE  |  PUBLIC HELP CENTRE  |  EXPERT CYBER SECURITY', canvasWidth/2, 60);
+
+        ctx.font = 'bold 48px "Segoe UI", Tahoma, sans-serif';
+        ctx.fillStyle = '#e6f1ff';
+        ctx.fillText('08', canvasWidth/2, 140);
+
+        // সাদা রেখা
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.2;
+        ctx.beginPath();
+        ctx.moveTo(100, 180);
+        ctx.lineTo(canvasWidth - 100, 180);
+        ctx.stroke();
+        ctx.globalAlpha = 1.0;
+
+        // নাম
+        ctx.shadowColor = '#00ff88';
+        ctx.shadowBlur = 30;
+        ctx.font = 'bold 72px "Segoe UI", Tahoma, sans-serif';
+        ctx.fillStyle = '#00ff88';
+        ctx.fillText(name, canvasWidth/2, 290);
+
+        ctx.shadowBlur = 0;
+        ctx.font = '16px "Segoe UI", Tahoma, sans-serif';
+        ctx.fillStyle = '#3f486b';
+        ctx.fillText('✅ সাইবার সিকিউরিটি হেল্প সেন্টার', canvasWidth/2, 370);
+
+        wrapper.classList.add('show');
+        downloadBtn.classList.add('show');
+    }
+
+    // ইনপুটে নাম দিলেই কাজ করবে
+    input.addEventListener('input', function () {
+        const name = this.value.trim();
+
+        if (name === '') {
+            wrapper.classList.remove('show');
+            downloadBtn.classList.remove('show');
+            return;
+        }
+
+        loadImageAndGenerate(name);
+    });
+
+    // ডাউনলোড বাটন
+    downloadBtn.addEventListener('click', function () {
+        const link = document.createElement('a');
+        link.download = `সাইবার_সিকিউরিটি_${input.value.trim()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    });
+</script>
+
+</body>
+  </html>
